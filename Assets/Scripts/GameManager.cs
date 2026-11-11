@@ -7,16 +7,16 @@ public class GameManager : MonoBehaviour
     [Header("GENERIC")]
     public int tileSize = 10; // a buffer putting distance between voxels
     //[Header("MAP")]
-    enum GridItems { EMPTY, WALL, APPLE, PLAYER_HEAD, PLAYER_BODY };
+    enum GridItem { EMPTY, WALL, APPLE, PLAYER_HEAD, PLAYER_BODY };
     const int gridSize = 22;
-    GridItems[,] mapGrid = new GridItems[gridSize,gridSize];  //2d array of the grid map. Access is [y][x], however for our purposes we could still just usit as [x][y]
+    GridItem[,] mapGrid = new GridItem[gridSize,gridSize];  //2d array of the grid map. Access is [y][x], however for our purposes we could still just usit as [x][y]
     //new doesn't need a delete in C# because of garbage collection, but we can still use it to initialize the array
     //however x must remember to write delete when x convert to C++.
     GameObject[,] voxels = new GameObject[gridSize, gridSize]; //this will hold all of the initialised cubes to show the map
 
 
     [Header("APPLE")]
-    bool isEaten = true;
+    bool appleEaten = true;
 
 
     void Start()
@@ -27,22 +27,22 @@ public class GameManager : MonoBehaviour
         {
             for (int y = 0; y < gridSize; y++)
             {
-                mapGrid[x, y] = GridItems.EMPTY;
+                mapGrid[x, y] = GridItem.EMPTY;
             }
         }
         //place walls
         for (int y = 0; y < gridSize; y++) //fill first and last rows as walls (y)
         {
-            mapGrid[0, y] = GridItems.WALL;
-            mapGrid[gridSize - 1, y] = GridItems.WALL;
+            mapGrid[0, y] = GridItem.WALL;
+            mapGrid[gridSize - 1, y] = GridItem.WALL;
         }
         for (int x = 1; x < gridSize; x++) //fill first and last columns as walls (x)
         {
-            mapGrid[x, 0] = GridItems.WALL;
-            mapGrid[x, gridSize - 1] = GridItems.WALL;
+            mapGrid[x, 0] = GridItem.WALL;
+            mapGrid[x, gridSize - 1] = GridItem.WALL;
         }
         //place player
-        PlaceItem(GridItems.PLAYER_HEAD, (gridSize-2) / 2, (gridSize-2) / 2 );
+        IdentifyAsItem(GridItem.PLAYER_HEAD, (gridSize-2) / 2, (gridSize-2) / 2 );
         //place apple
         RegenerateApple();
 
@@ -50,19 +50,19 @@ public class GameManager : MonoBehaviour
         InstantiateAllVoxels();
     }
 
-    void PlaceItem(GridItems item, int x, int y)
+    void IdentifyAsItem(GridItem item, int x, int y)
     {
-        if (mapGrid[x,y] == GridItems.EMPTY)
+        if (mapGrid[x,y] == GridItem.EMPTY)
         {
             mapGrid[x, y] = item;
         }
     }
 
-    void RemoveItem(int x, int y)
+    void UnidentifyItem(int x, int y)
     {
-        if(mapGrid[x,y] != GridItems.WALL)
+        if(mapGrid[x,y] != GridItem.WALL)
         {
-            mapGrid[x, y] = GridItems.EMPTY;
+            mapGrid[x, y] = GridItem.EMPTY;
         }
     }
 
@@ -74,17 +74,17 @@ public class GameManager : MonoBehaviour
 
     void RegenerateApple()
     {
-        if(isEaten)
+        if(appleEaten)
         {
-            isEaten = false;
+            appleEaten = false;
             int appleX = 0;
             int appleY = 0;
             GenerateRandomPos(ref appleX, ref appleY);
-            while (mapGrid[appleX,appleY] != GridItems.EMPTY)  // make sure that the desired new position for the apple is in an empty spot
+            while (mapGrid[appleX,appleY] != GridItem.EMPTY)  // make sure that the desired new position for the apple is in an empty spot
             {
                 GenerateRandomPos(ref appleX, ref appleY);
             }
-            PlaceItem(GridItems.APPLE, appleX, appleY);
+            IdentifyAsItem(GridItem.APPLE, appleX, appleY);
         }
     }
 
@@ -111,23 +111,23 @@ public class GameManager : MonoBehaviour
             {
                 switch (mapGrid[x,y])
                 {
-                    case GridItems.EMPTY:
+                    case GridItem.EMPTY:
                         voxels[x, y].GetComponent<Renderer>().material.color = Color.grey;
                         break;
 
-                    case GridItems.WALL:
+                    case GridItem.WALL:
                         voxels[x,y].GetComponent<Renderer>().material.color = Color.white;
                         break;
 
-                    case GridItems.APPLE:
+                    case GridItem.APPLE:
                         voxels[x, y].GetComponent<Renderer>().material.color = Color.red;
                         break;
 
-                    case GridItems.PLAYER_HEAD:
+                    case GridItem.PLAYER_HEAD:
                         voxels[x, y].GetComponent<Renderer>().material.color = Color.blue;
                         break;
 
-                    case GridItems.PLAYER_BODY:
+                    case GridItem.PLAYER_BODY:
                         voxels[x, y].GetComponent<Renderer>().material.color = Color.green;
                         break;
                 }
